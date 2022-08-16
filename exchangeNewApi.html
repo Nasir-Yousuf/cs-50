@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>React cdn</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.js"></script>
+
+    <script type="text/babel">
+      const Component = class Component extends React.Component {
+        constructor(props) {
+          super(props);
+          this.currencies = [
+            "BDT",
+            "AUD",
+            "CAD",
+            "CNY",
+            "INR",
+            "USD",
+            "EUR",
+            "GBP",
+          ];
+          this.state = {
+            base: "USD",
+            other: "GBP",
+            value: 5,
+            converted: 0,
+          };
+        }
+        render() {
+          return (
+            <div>
+              <div>
+                <select
+                  onChange={(this.onBaseChange, this.recaluculate)}
+                  name="base"
+                  value={this.state.base}
+                >
+                  {this.currencies.map((currencies) => (
+                    <option key={currencies} value={currencies}>
+                      {currencies}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  onChange={this.onInputChange}
+                  value={this.state.value}
+                  type="text"
+                />
+              </div>
+              <div>
+                <select
+                  onChange={this.onBaseChange}
+                  name="other"
+                  value={this.state.other}
+                >
+                  {this.currencies.map((currencies) => (
+                    <option key={currencies} value={currencies}>
+                      {currencies}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  disabled={true}
+                  value={this.state.converted}
+                  type="text"
+                />
+              </div>
+            </div>
+          );
+        }
+        onBaseChange = (event) => {
+          this.setState({
+            [event.target.name]: event.target.value,
+          });
+        };
+        onInputChange = (event) => {
+          this.setState({
+            value: event.target.value,
+          });
+        };
+        recaluculate = () => {
+          const value = parseFloat(this.state.value);
+          if (isNaN(value)) {
+            return;
+          }
+
+          var myHeaders = new Headers();
+          myHeaders.append("apikey", "6rmtq0Ht5QUd7ncF11GvSGEHlPVK6HRm");
+
+          var requestOptions = {
+            method: "GET",
+            redirect: "follow",
+            headers: myHeaders,
+          };
+
+          fetch(
+            `https://api.apilayer.com/exchangerates_data/convert?to=${this.state.other}&from=${this.state.base}&amount=${this.state.value}`,
+            requestOptions
+          )
+            .then((response) => response.text())
+            .then((result) =>
+              this.setState({ converted: JSON.parse(result).result })
+            )
+            .catch((error) => console.log("error", error));
+        };
+        componentDidUpdate() {
+          this.recaluculate();
+        }
+      };
+
+      ReactDOM.render(<Component />, document.getElementById("root"));
+    </script>
+  </body>
+</html>
